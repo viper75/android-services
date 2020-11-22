@@ -9,14 +9,14 @@ import androidx.annotation.Nullable;
 
 import java.util.Random;
 
-public class BoundServiceExampleOne extends Service {
+public class BinderService extends Service {
 
     private final IBinder binder = new LocalServiceBinder();
     private final Random generator = new Random();
 
     public class LocalServiceBinder extends Binder {
-        BoundServiceExampleOne getService() {
-            return BoundServiceExampleOne.this;
+        BinderService getService() {
+            return BinderService.this;
         }
     }
 

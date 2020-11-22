@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-public class StartedServiceExample extends Service {
+public class StartedService extends Service {
     private ServiceHandler serviceHandler;
 
     // Handler that receives messages from the thread

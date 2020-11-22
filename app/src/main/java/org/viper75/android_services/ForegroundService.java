@@ -10,7 +10,7 @@ import androidx.core.app.NotificationCompat;
 
 import static org.viper75.android_services.App.CHANNEL_ID;
 
-public class ForegroundServiceExample extends Service {
+public class ForegroundService extends Service {
 
     private static final int NOTIFICATION_ID = 200;
 

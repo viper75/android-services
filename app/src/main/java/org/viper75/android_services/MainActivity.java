@@ -7,27 +7,46 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.widget.Toast;
 
 import org.viper75.android_services.databinding.ActivityMainBinding;
-import org.viper75.android_services.BoundServiceExampleOne.LocalServiceBinder;
+import org.viper75.android_services.BinderService.LocalServiceBinder;
 
 public class MainActivity extends AppCompatActivity {
 
-    private BoundServiceExampleOne mService;
-    private boolean mBound = false;
+    private BinderService mBinderService;
+    private Messenger mMessengerService;
+    private boolean mBinderServiceBound = false;
+    private boolean mMessengerServiceBound = false;
 
-    private ServiceConnection connection = new ServiceConnection() {
+    private ServiceConnection binderConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             LocalServiceBinder binder = (LocalServiceBinder) service;
-            mService = binder.getService();
-            mBound = true;
+            mBinderService = binder.getService();
+            mBinderServiceBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mBound = false;
+            mBinderServiceBound = false;
+        }
+    };
+
+    private ServiceConnection messengerConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mMessengerService = new Messenger(service);
+            mMessengerServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mMessengerService = null;
+            mMessengerServiceBound = false;
         }
     };
 
@@ -39,11 +58,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(mainBinding.getRoot());
 
         mainBinding.startStartedService.setOnClickListener(v -> {
-            Intent intent = new Intent(this, StartedServiceExample.class);
+            Intent intent = new Intent(this, StartedService.class);
             startService(intent);
         });
 
-        Intent intent = new Intent(this, ForegroundServiceExample.class);
+        Intent intent = new Intent(this, ForegroundService.class);
         mainBinding.startService.setOnClickListener(v -> {
             startService(intent);
         });
@@ -53,9 +72,20 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mainBinding.getRandomNumber.setOnClickListener(v -> {
-            if (mBound) {
-                int num = mService.getRandomNumber();
+            if (mBinderServiceBound) {
+                int num = mBinderService.getRandomNumber();
                 Toast.makeText(this, "Generated number: " + num, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mainBinding.sayHello.setOnClickListener(v -> {
+            if (!mMessengerServiceBound) return;
+
+            Message msg = Message.obtain(null, MessengerService.MSG_SAY_HELLO, 0, 0);
+            try {
+                mMessengerService.send(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
         });
     }
@@ -63,14 +93,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        Intent intent = new Intent(this, BoundServiceExampleOne.class);
-        bindService(intent, connection, BIND_AUTO_CREATE);
+        Intent intent = new Intent(this, MessengerService.class);
+        bindService(intent, messengerConnection, BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        unbindService(connection);
-        mBound = false;
+        if (mMessengerServiceBound) {
+            unbindService(messengerConnection);
+            mMessengerServiceBound = false;
+        }
     }
 }

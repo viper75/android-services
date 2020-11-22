@@ -11,15 +11,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service
-            android:name=".ForegroundServiceExample"
+            android:name=".ForegroundService"
             android:enabled="true"
             android:exported="false" />
         <service
-            android:name=".StartedServiceExample"
+            android:name=".StartedService"
             android:description="@string/app_name"
             android:exported="false" />
 
-        <service android:name=".BoundServiceExampleOne" android:exported="false"/>
+        <service android:name=".BinderService" android:exported="false"/>
+        <service android:name=".MessengerService" android:exported="false"/>
 
         <activity android:name=".MainActivity">
             <intent-filter>
